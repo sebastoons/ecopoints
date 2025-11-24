@@ -1,0 +1,67 @@
+# backend/.gitignore
+
+# Entorno virtual
+venv/
+env/
+ENV/
+
+# Base de datos SQLite
+*.sqlite3
+db.sqlite3
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Variables de entorno - ¡NUNCA SUBIR A GIT!
+.env
+.env.local
+.env.production
+
+# Media files (archivos subidos por usuarios)
+media/
+
+# Static files
+staticfiles/
+static_collected/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+```
+
+---
+
+## 9. Preparar para PostgreSQL en Railway
+
+### 9.1 Crear runtime.txt (opcional pero recomendado)
+
+Crea `backend/runtime.txt`:
+```
+python-3.11.0
+```
+
+### 9.2 Crear Procfile para Railway
+
+Crea `backend/Procfile`:
+```
+web: gunicorn ecopoints_backend.wsgi --log-file -
