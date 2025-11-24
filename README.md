@@ -97,13 +97,6 @@ El servidor estará disponible en: http://127.0.0.1:8000/
 - `GET /api/logros/mis-logros/` - Mis logros obtenidos
 - `GET /api/grupos/` - Listar grupos ecológicos
 
-## 👥 Equipo de Desarrollo
-
-- **Product Owner:** Javiera Valderrama
-- **Scrum Master:** Boris Negrete
-- **Desarrollo Backend:** Sebastián Parra
-- **Desarrollo Frontend / UX:** Francisca Osorio
-
 ## 📄 Licencia
 
 Proyecto académico - INACAP 2025
