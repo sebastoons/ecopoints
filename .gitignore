@@ -16,13 +16,22 @@ backend/.Python
 backend/**/.pytest_cache/
 backend/**/.mypy_cache/
 
-# Frontend (cuando lo creemos)
+# Frontend Node
 frontend/node_modules/
-frontend/build/
 frontend/dist/
+frontend/build/
 frontend/.env
 frontend/.env.local
 frontend/.env.production
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+frontend/.vite/
 frontend/.next/
 frontend/out/
 
