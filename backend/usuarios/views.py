@@ -79,18 +79,33 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         """
         Iniciar sesión y obtener tokens JWT (HU02).
         POST /api/usuarios/login/
-        Body: { "username": "...", "password": "..." }
+        Body: { "email": "...", "password": "..." } o { "username": "...", "password": "..." }
         """
+        email = request.data.get('email')
         username = request.data.get('username')
         password = request.data.get('password')
         
-        if not username or not password:
+        if not password:
             return Response({
-                'error': 'Por favor proporciona username y password'
+                'error': 'Por favor proporciona la contraseña'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Autenticar usuario
-        usuario = authenticate(username=username, password=password)
+        if not email and not username:
+            return Response({
+                'error': 'Por favor proporciona email o username'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Buscar usuario por email o username
+        usuario = None
+        
+        if email:
+            try:
+                user_obj = Usuario.objects.get(email=email)
+                usuario = authenticate(username=user_obj.username, password=password)
+            except Usuario.DoesNotExist:
+                pass
+        elif username:
+            usuario = authenticate(username=username, password=password)
         
         if usuario is None:
             return Response({

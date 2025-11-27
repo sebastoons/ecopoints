@@ -45,6 +45,22 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'fecha_nacimiento', 'telefono'
         ]
     
+    def validate_email(self, value):
+        """
+        Validar que el email no esté en uso.
+        """
+        if Usuario.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este email ya está en uso.")
+        return value
+    
+    def validate_username(self, value):
+        """
+        Validar que el username no esté en uso.
+        """
+        if Usuario.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Este nombre de usuario ya está en uso.")
+        return value
+    
     def validate(self, attrs):
         """
         Validar que las contraseñas coincidan.

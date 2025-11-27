@@ -10,8 +10,7 @@ const Login = () => {
   
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    userType: 'user' // 'admin' o 'user'
+    password: ''
   });
   
   const [error, setError] = useState('');
@@ -27,13 +26,6 @@ const Login = () => {
     if (error) setError('');
   };
 
-  const handleUserTypeChange = (type) => {
-    setFormData(prev => ({
-      ...prev,
-      userType: type
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -42,6 +34,12 @@ const Login = () => {
     // Validaciones básicas
     if (!formData.email || !formData.password) {
       setError('Por favor completa todos los campos');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.email.includes('@')) {
+      setError('Por favor ingresa un email válido');
       setLoading(false);
       return;
     }
@@ -56,9 +54,9 @@ const Login = () => {
       console.log('Intentando login con:', credentials.email);
 
       // Llamar al servicio de login
-      await login(credentials);
+      const result = await login(credentials);
 
-      console.log('Login exitoso, redirigiendo...');
+      console.log('Login exitoso:', result);
       
       // Esperar un momento antes de navegar
       setTimeout(() => {
@@ -77,13 +75,13 @@ const Login = () => {
         if (status === 401) {
           setError('Credenciales incorrectas. Verifica tu email y contraseña.');
         } else if (status === 400) {
-          setError(data.detail || data.message || 'Datos inválidos. Verifica tu información.');
+          setError(data.error || data.detail || data.message || 'Datos inválidos. Verifica tu información.');
         } else if (status === 404) {
-          setError('Usuario no encontrado.');
+          setError('Usuario no encontrado. Verifica tu email.');
         } else if (status >= 500) {
           setError('Error del servidor. Intenta más tarde.');
         } else {
-          setError(data.detail || data.message || 'Error al iniciar sesión.');
+          setError(data.error || data.detail || data.message || 'Error al iniciar sesión.');
         }
       } else if (err.request) {
         // Error de red
@@ -102,7 +100,16 @@ const Login = () => {
       <div className="auth-card">
         {/* Logo */}
         <div className="auth-logo">
-          <img src="/logo-auth.png" alt="EcoPoints" />
+          <div style={{ 
+            fontSize: '3rem', 
+            marginBottom: '10px',
+            color: '#4CAF50' 
+          }}>🌱</div>
+          <h1 style={{ 
+            color: '#4CAF50', 
+            fontSize: '1.8rem', 
+            margin: '0 0 10px 0' 
+          }}>EcoPoints</h1>
         </div>
 
         {/* Avatar */}
@@ -111,25 +118,14 @@ const Login = () => {
         </div>
 
         {/* Título */}
-        <h2 className="auth-title">Iniciar Sesión</h2>
-
-        {/* Selector de tipo de usuario */}
-        <div className="login-type-selector">
-          <button
-            type="button"
-            className={`type-btn ${formData.userType === 'admin' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('admin')}
-          >
-            Administrador
-          </button>
-          <button
-            type="button"
-            className={`type-btn ${formData.userType === 'user' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('user')}
-          >
-            Usuario
-          </button>
-        </div>
+        <h2 style={{ 
+          fontSize: '1.5rem', 
+          fontWeight: 700, 
+          color: '#333', 
+          marginBottom: '25px' 
+        }}>
+          Iniciar Sesión
+        </h2>
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="auth-form">
@@ -144,6 +140,7 @@ const Login = () => {
               onChange={handleChange}
               disabled={loading}
               autoComplete="email"
+              required
             />
           </div>
 
@@ -158,6 +155,7 @@ const Login = () => {
               onChange={handleChange}
               disabled={loading}
               autoComplete="current-password"
+              required
             />
           </div>
 
@@ -176,18 +174,17 @@ const Login = () => {
           >
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
-
-          {/* Enlaces */}
-          <div className="auth-links">
-            <Link to="/recuperar-contrasena" className="auth-link">
-              ¿Olvidaste tu contraseña?
-            </Link>
-            <div className="auth-separator">|</div>
-            <Link to="/register" className="auth-link">
-              Registrarse
-            </Link>
-          </div>
         </form>
+
+        {/* Footer Links */}
+        <div className="auth-footer">
+          <Link to="/recuperar-contrasena" className="footer-link">
+            ¿Olvidaste tu contraseña?
+          </Link>
+          <p className="footer-text">
+            ¿No tienes cuenta? <Link to="/register" className="link-highlight">Regístrate aquí</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

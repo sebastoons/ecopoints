@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import api from './api';
 import { jwtDecode } from 'jwt-decode';
 
@@ -6,7 +5,17 @@ const authService = {
   // Registrar usuario
   register: async (userData) => {
     try {
-      const response = await api.post('/usuarios/registro/', userData);
+      // Generar username único basado en el email
+      const username = userData.email.split('@')[0] + '_' + Date.now().toString().slice(-4);
+      
+      const dataToSend = {
+        ...userData,
+        username: username
+      };
+      
+      console.log('Datos a enviar para registro:', dataToSend);
+      
+      const response = await api.post('/usuarios/registro/', dataToSend);
       
       // Verificar que vengan los tokens
       if (response.data.tokens) {
@@ -24,12 +33,23 @@ const authService = {
   // Iniciar sesión
   login: async (credentials) => {
     try {
-      const response = await api.post('/usuarios/login/', credentials);
+      console.log('Intentando login con email:', credentials.email);
+      
+      // Enviar email en lugar de username
+      const dataToSend = {
+        email: credentials.email,
+        password: credentials.password
+      };
+      
+      console.log('Datos a enviar para login:', dataToSend);
+      
+      const response = await api.post('/usuarios/login/', dataToSend);
       
       // Verificar que vengan los tokens
       if (response.data.tokens) {
         localStorage.setItem('access_token', response.data.tokens.access);
         localStorage.setItem('refresh_token', response.data.tokens.refresh);
+        console.log('Tokens guardados correctamente');
       }
       
       return response.data;

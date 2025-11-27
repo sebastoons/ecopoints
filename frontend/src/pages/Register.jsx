@@ -34,20 +34,30 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (formData.password !== formData.password2) {
-      newErrors.password2 = 'Las contraseñas no coinciden';
+    // Validar nombre
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = 'El nombre es requerido';
     }
 
-    if (formData.password.length < 8) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-    }
-
-    if (!formData.email.includes('@')) {
+    // Validar email
+    if (!formData.email) {
+      newErrors.email = 'El email es requerido';
+    } else if (!formData.email.includes('@') || !formData.email.includes('.')) {
       newErrors.email = 'Email inválido';
     }
 
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'El nombre completo es requerido';
+    // Validar contraseña
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+    }
+
+    // Validar confirmación de contraseña
+    if (!formData.password2) {
+      newErrors.password2 = 'Confirma tu contraseña';
+    } else if (formData.password !== formData.password2) {
+      newErrors.password2 = 'Las contraseñas no coinciden';
     }
 
     return newErrors;
@@ -67,22 +77,79 @@ const Register = () => {
 
     try {
       const userData = {
-        username: formData.email.split('@')[0],
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
         password2: formData.password2,
-        first_name: formData.first_name,
-        last_name: ''
+        first_name: formData.first_name.trim(),
+        last_name: '' // Campo opcional
       };
 
-      await register(userData);
-      navigate('/');
+      console.log('Datos a enviar:', userData);
+
+      const result = await register(userData);
+      
+      console.log('Registro exitoso:', result);
+      
+      // Navegar al dashboard
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 100);
+
     } catch (err) {
       console.error('Error de registro:', err);
-      setErrors(
-        err.response?.data || 
-        { general: 'Error al registrar usuario. Intenta nuevamente.' }
-      );
+      
+      if (err.response?.data) {
+        const serverErrors = err.response.data;
+        
+        // Mapear errores del servidor
+        const mappedErrors = {};
+        
+        if (serverErrors.email) {
+          mappedErrors.email = Array.isArray(serverErrors.email) 
+            ? serverErrors.email[0] 
+            : serverErrors.email;
+        }
+        
+        if (serverErrors.username) {
+          mappedErrors.username = Array.isArray(serverErrors.username) 
+            ? serverErrors.username[0] 
+            : serverErrors.username;
+        }
+        
+        if (serverErrors.password) {
+          mappedErrors.password = Array.isArray(serverErrors.password) 
+            ? serverErrors.password[0] 
+            : serverErrors.password;
+        }
+        
+        if (serverErrors.password2 || serverErrors.password_confirm) {
+          mappedErrors.password2 = Array.isArray(serverErrors.password2) 
+            ? serverErrors.password2[0] 
+            : serverErrors.password2 || serverErrors.password_confirm;
+        }
+        
+        if (serverErrors.first_name) {
+          mappedErrors.first_name = Array.isArray(serverErrors.first_name) 
+            ? serverErrors.first_name[0] 
+            : serverErrors.first_name;
+        }
+        
+        // Error general
+        if (serverErrors.detail || serverErrors.error || serverErrors.message) {
+          mappedErrors.general = serverErrors.detail || serverErrors.error || serverErrors.message;
+        }
+        
+        // Si no hay errores específicos, mostrar error general
+        if (Object.keys(mappedErrors).length === 0) {
+          mappedErrors.general = 'Error al registrar usuario. Intenta nuevamente.';
+        }
+        
+        setErrors(mappedErrors);
+      } else {
+        setErrors({ 
+          general: 'Error de conexión. Verifica tu conexión a internet.' 
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -91,14 +158,23 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        {/* Logo - Coloca tu logo en public/logo-auth.png */}
+        {/* Logo */}
         <div className="auth-logo">
-          <img src="/logo-auth.png" alt="EcoPoints" />
+          <div style={{ 
+            fontSize: '3rem', 
+            marginBottom: '10px',
+            color: '#4CAF50' 
+          }}>🌱</div>
+          <h1 style={{ 
+            color: '#4CAF50', 
+            fontSize: '1.8rem', 
+            margin: '0 0 10px 0' 
+          }}>EcoPoints</h1>
         </div>
 
         {/* Subtitle */}
         <p className="auth-subtitle">
-          Crea tu cuenta para empezar a reciclar y ganar puntos.
+          Crea tu cuenta para empezar a acumular puntos por tus acciones ecológicas.
         </p>
 
         {/* Formulario */}
@@ -117,7 +193,7 @@ const Register = () => {
               name="first_name"
               value={formData.first_name}
               onChange={handleChange}
-              placeholder="Introduce tu nombre"
+              placeholder="Tu nombre completo"
               required
               disabled={loading}
             />
@@ -132,7 +208,7 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Introduce tu correo"
+              placeholder="Tu correo electrónico"
               required
               disabled={loading}
             />
