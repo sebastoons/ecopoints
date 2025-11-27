@@ -5,28 +5,46 @@ import { jwtDecode } from 'jwt-decode';
 const authService = {
   // Registrar usuario
   register: async (userData) => {
-    const response = await api.post('/usuarios/registro/', userData);
-    if (response.data.access) {
-      localStorage.setItem('access_token', response.data.access);
-      localStorage.setItem('refresh_token', response.data.refresh);
+    try {
+      const response = await api.post('/usuarios/registro/', userData);
+      
+      // Verificar que vengan los tokens
+      if (response.data.tokens) {
+        localStorage.setItem('access_token', response.data.tokens.access);
+        localStorage.setItem('refresh_token', response.data.tokens.refresh);
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error en registro:', error.response?.data);
+      throw error;
     }
-    return response.data;
   },
 
   // Iniciar sesión
   login: async (credentials) => {
-    const response = await api.post('/usuarios/login/', credentials);
-    if (response.data.access) {
-      localStorage.setItem('access_token', response.data.access);
-      localStorage.setItem('refresh_token', response.data.refresh);
+    try {
+      const response = await api.post('/usuarios/login/', credentials);
+      
+      // Verificar que vengan los tokens
+      if (response.data.tokens) {
+        localStorage.setItem('access_token', response.data.tokens.access);
+        localStorage.setItem('refresh_token', response.data.tokens.refresh);
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error en login:', error.response?.data);
+      throw error;
     }
-    return response.data;
   },
 
   // Cerrar sesión
   logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    // Limpiar cualquier otro dato del usuario
+    localStorage.clear();
   },
 
   // Obtener usuario actual del token
@@ -36,6 +54,7 @@ const authService = {
       try {
         return jwtDecode(token);
       } catch (error) {
+        console.error('Error decodificando token:', error);
         return null;
       }
     }
@@ -50,22 +69,45 @@ const authService = {
     try {
       const decoded = jwtDecode(token);
       // Verificar si el token expiró
-      return decoded.exp * 1000 > Date.now();
+      const isValid = decoded.exp * 1000 > Date.now();
+      
+      // Si el token expiró, limpiar todo
+      if (!isValid) {
+        authService.logout();
+      }
+      
+      return isValid;
     } catch (error) {
+      console.error('Error validando token:', error);
+      authService.logout();
       return false;
     }
   },
 
   // Obtener perfil completo
   getProfile: async () => {
-    const response = await api.get('/usuarios/perfil/');
-    return response.data;
+    try {
+      const response = await api.get('/usuarios/perfil/');
+      return response.data;
+    } catch (error) {
+      console.error('Error obteniendo perfil:', error);
+      // Si falla obtener perfil, limpiar sesión
+      if (error.response?.status === 401) {
+        authService.logout();
+      }
+      throw error;
+    }
   },
 
   // Actualizar perfil
   updateProfile: async (data) => {
-    const response = await api.put('/usuarios/perfil/editar/', data);
-    return response.data;
+    try {
+      const response = await api.put('/usuarios/perfil/editar/', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error actualizando perfil:', error);
+      throw error;
+    }
   },
 };
 

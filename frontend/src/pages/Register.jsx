@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './Register.css';
+import { FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
+import './Login.css';
 
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
   
   const [formData, setFormData] = useState({
-    username: '',
+    first_name: '',
     email: '',
     password: '',
-    password2: '',
-    first_name: '',
-    last_name: ''
+    password2: ''
   });
   
   const [errors, setErrors] = useState({});
@@ -24,7 +23,6 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    // Limpiar error del campo al escribir
     if (errors[e.target.name]) {
       setErrors({
         ...errors,
@@ -48,6 +46,10 @@ const Register = () => {
       newErrors.email = 'Email inválido';
     }
 
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = 'El nombre completo es requerido';
+    }
+
     return newErrors;
   };
 
@@ -64,8 +66,17 @@ const Register = () => {
     setErrors({});
 
     try {
-      await register(formData);
-      navigate('/'); // Redirigir al home después del registro
+      const userData = {
+        username: formData.email.split('@')[0],
+        email: formData.email,
+        password: formData.password,
+        password2: formData.password2,
+        first_name: formData.first_name,
+        last_name: ''
+      };
+
+      await register(userData);
+      navigate('/');
     } catch (err) {
       console.error('Error de registro:', err);
       setErrors(
@@ -78,122 +89,100 @@ const Register = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-card">
-        <div className="register-header">
-          <h1>🌱 EcoPoints</h1>
-          <p>Únete a nuestra comunidad ecológica</p>
+    <div className="auth-container">
+      <div className="auth-card">
+        {/* Logo - Coloca tu logo en public/logo-auth.png */}
+        <div className="auth-logo">
+          <img src="/logo-auth.png" alt="EcoPoints" />
         </div>
 
-        <form onSubmit={handleSubmit} className="register-form">
+        {/* Subtitle */}
+        <p className="auth-subtitle">
+          Crea tu cuenta para empezar a reciclar y ganar puntos.
+        </p>
+
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} className="auth-form">
           {errors.general && (
             <div className="error-message">
               {errors.general}
             </div>
           )}
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="first_name">Nombre</label>
-              <input
-                type="text"
-                id="first_name"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="Tu nombre"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="last_name">Apellido</label>
-              <input
-                type="text"
-                id="last_name"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                placeholder="Tu apellido"
-                required
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="username">Usuario</label>
+          {/* Nombre Completo */}
+          <div className="input-group">
+            <FaUser className="input-icon" />
             <input
               type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              name="first_name"
+              value={formData.first_name}
               onChange={handleChange}
-              placeholder="Elige un nombre de usuario"
+              placeholder="Introduce tu nombre"
               required
               disabled={loading}
             />
-            {errors.username && <span className="field-error">{errors.username}</span>}
           </div>
+          {errors.first_name && <span className="field-error">{errors.first_name}</span>}
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+          {/* Email */}
+          <div className="input-group">
+            <FaEnvelope className="input-icon" />
             <input
               type="email"
-              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="tu@email.com"
+              placeholder="Introduce tu correo"
               required
               disabled={loading}
             />
-            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
+          {errors.email && <span className="field-error">{errors.email}</span>}
 
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
+          {/* Contraseña */}
+          <div className="input-group">
+            <FaLock className="input-icon" />
             <input
               type="password"
-              id="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Crea una contraseña"
               required
               disabled={loading}
             />
-            {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
+          {errors.password && <span className="field-error">{errors.password}</span>}
 
-          <div className="form-group">
-            <label htmlFor="password2">Confirmar Contraseña</label>
+          {/* Confirmar Contraseña */}
+          <div className="input-group">
+            <FaLock className="input-icon" />
             <input
               type="password"
-              id="password2"
               name="password2"
               value={formData.password2}
               onChange={handleChange}
-              placeholder="Repite tu contraseña"
+              placeholder="Confirma tu contraseña"
               required
               disabled={loading}
             />
-            {errors.password2 && <span className="field-error">{errors.password2}</span>}
           </div>
+          {errors.password2 && <span className="field-error">{errors.password2}</span>}
 
+          {/* Botón Submit */}
           <button 
             type="submit" 
-            className="btn-primary"
+            className="btn-submit"
             disabled={loading}
           >
-            {loading ? 'Registrando...' : 'Registrarse'}
+            {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>
         </form>
 
-        <div className="register-footer">
-          <p>
-            ¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link>
+        {/* Footer Links */}
+        <div className="auth-footer">
+          <p className="footer-text">
+            ¿Ya tienes una cuenta? <Link to="/login" className="link-highlight">Inicia Sesión</Link>
           </p>
         </div>
       </div>

@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Páginas (las crearemos en el siguiente paso)
+// Páginas
 import Login from './pages/Login';
 import Register from './pages/Register';
+import RecuperarContrasena from './pages/RecuperarContrasena';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Tareas from './pages/Tareas';
@@ -21,6 +22,7 @@ function App() {
           {/* Rutas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
 
           {/* Rutas protegidas */}
           <Route

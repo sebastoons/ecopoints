@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Header from '../components/Header';
 import tareasService from '../services/tareas.service';
 import gamificacionService from '../services/gamificacion.service';
 import StatsCard from '../components/StatsCard';
@@ -12,14 +13,13 @@ import {
   FaLeaf, 
   FaStar, 
   FaPlus, 
-  FaChevronRight,
-  FaSignOutAlt 
+  FaChevronRight
 } from 'react-icons/fa';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [estadisticas, setEstadisticas] = useState(null);
@@ -36,7 +36,6 @@ const Home = () => {
       setLoading(true);
       setError('');
 
-      // Cargar datos en paralelo
       const [statsData, tareasData, logrosData] = await Promise.all([
         tareasService.getEstadisticas(),
         tareasService.getTareasRecientes(),
@@ -46,7 +45,6 @@ const Home = () => {
       setEstadisticas(statsData);
       setTareasRecientes(tareasData.results || tareasData);
       
-      // Obtener últimos 3 logros desbloqueados
       const logrosDesbloqueados = (logrosData.results || logrosData)
         .filter(l => l.desbloqueado)
         .slice(0, 3);
@@ -60,18 +58,12 @@ const Home = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   const calcularProgresoNivel = () => {
     if (!estadisticas?.nivel_actual || !estadisticas?.puntos_totales) {
       return { current: 0, total: 100 };
     }
 
     const nivel = estadisticas.nivel_actual;
-    // Puntos necesarios para el siguiente nivel (fórmula ejemplo)
     const puntosParaSiguienteNivel = nivel * 1000;
     const puntosNivelAnterior = (nivel - 1) * 1000;
     const puntosEnNivelActual = estadisticas.puntos_totales - puntosNivelAnterior;
@@ -97,25 +89,11 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      {/* Header */}
-      <header className="home-header">
-        <div className="header-content">
-          <div className="header-user">
-            <div className="user-avatar">
-              {user?.first_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-            </div>
-            <div className="user-info">
-              <h1 className="user-greeting">
-                Hola, {user?.first_name || user?.username}! 👋
-              </h1>
-              <p className="user-subtitle">Tus Logros Ecológicos</p>
-            </div>
-          </div>
-          <button className="btn-logout" onClick={handleLogout}>
-            <FaSignOutAlt />
-          </button>
-        </div>
-      </header>
+      {/* Header con Logo de Dashboard */}
+      <Header 
+        title={`Hola, ${user?.first_name || user?.username}! 👋`}
+        subtitle="Tus Logros Ecológicos"
+      />
 
       {/* Main Content */}
       <main className="home-main">
@@ -178,7 +156,7 @@ const Home = () => {
           </button>
         </section>
 
-        {/* Impacto Semanal (Chart Placeholder) */}
+        {/* Impacto Semanal */}
         <section className="impact-section">
           <div className="section-header">
             <h2 className="section-title">Impacto Semanal</h2>
